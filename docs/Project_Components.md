@@ -404,8 +404,8 @@ For every component
 - [x] Component 03
 - [x] Component 04
 - [x] Component 05
-- [ ] Component 06
-- [ ] Component 07
+- [x] Component 06
+- [x] Component 07
 - [ ] Component 08
 - [ ] Component 09
 - [ ] Component 10

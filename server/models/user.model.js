@@ -1,69 +1,98 @@
-// server/models/user.model.js
-
-const { pool } = require('../config/db');
+const pool = require('../config/db');
 
 /**
- * Safe columns only — password_hash is never selected here.
+ * All parameterized SQL access for the `users` table. Every query
+ * explicitly enumerates safe columns and never selects `password_hash`
+ * except `findByEmailWithPassword`, which exists solely for the login
+ * flow in auth.controller.js and whose result is discarded immediately
+ * after bcrypt comparison.
  */
-const SAFE_COLUMNS = 'id, name, email, role, account_status, created_at, updated_at';
 
 /**
- * Inserts a new user row. Intended to be called within a transaction
- * (see companyProfile/studentProfile creation in auth.controller.js).
+ * Inserts a new user row. Intended to be called inside the same
+ * transaction as the corresponding role-profile insert during
+ * registration.
+ *
  * @param {import('mysql2/promise').PoolConnection} connection
- * @param {{ name: string, email: string, passwordHash: string, role: 'student'|'company'|'admin' }} data
- * @returns {Promise<number>} insertId
+ * @param {{ name: string, email: string, passwordHash: string, role: 'student'|'company'|'admin' }} params
+ * @returns {Promise<number>} the newly created users.id
  */
 async function createUser(connection, { name, email, passwordHash, role }) {
   const [result] = await connection.execute(
-    `INSERT INTO users (name, email, password_hash, role)
-     VALUES (?, ?, ?, ?)`,
+    `INSERT INTO users (name, email, password_hash, role, account_status)
+     VALUES (?, ?, ?, ?, 'active')`,
     [name, email, passwordHash, role]
   );
   return result.insertId;
 }
 
 /**
- * Finds a user by email, excluding password_hash — used for uniqueness
- * checks during registration.
+ * Finds a user by email, returning only safe columns. Used to check
+ * uniqueness during registration and for general lookups.
+ *
  * @param {string} email
  * @returns {Promise<object|null>}
  */
 async function findByEmail(email) {
   const [rows] = await pool.execute(
-    `SELECT ${SAFE_COLUMNS} FROM users WHERE email = ? LIMIT 1`,
+    `SELECT id, name, email, role, account_status, created_at, updated_at
+     FROM users
+     WHERE email = ?
+     LIMIT 1`,
     [email]
   );
   return rows[0] || null;
 }
 
 /**
- * Finds a user by email INCLUDING password_hash — used only by the login
- * flow, immediately after which the hash is discarded and never returned
- * to the client.
+ * Finds a user by email INCLUDING the password hash. Login-only. The
+ * caller must never forward `password_hash` beyond the bcrypt.compare()
+ * call.
+ *
  * @param {string} email
  * @returns {Promise<object|null>}
  */
 async function findByEmailWithPassword(email) {
   const [rows] = await pool.execute(
-    `SELECT id, name, email, password_hash, role, account_status, created_at, updated_at
-     FROM users WHERE email = ? LIMIT 1`,
+    `SELECT id, name, email, password_hash, role, account_status
+     FROM users
+     WHERE email = ?
+     LIMIT 1`,
     [email]
   );
   return rows[0] || null;
 }
 
 /**
- * Finds a user by id, excluding password_hash.
- * @param {number} id
+ * Finds a user by id, returning only safe columns.
+ *
+ * @param {number} userId
  * @returns {Promise<object|null>}
  */
-async function findById(id) {
+async function findById(userId) {
   const [rows] = await pool.execute(
-    `SELECT ${SAFE_COLUMNS} FROM users WHERE id = ? LIMIT 1`,
-    [id]
+    `SELECT id, name, email, role, account_status, created_at, updated_at
+     FROM users
+     WHERE id = ?
+     LIMIT 1`,
+    [userId]
   );
   return rows[0] || null;
+}
+
+/**
+ * Updates a user's display name.
+ *
+ * @param {number} userId
+ * @param {string} name
+ * @returns {Promise<boolean>} true if a row was updated
+ */
+async function updateName(userId, name) {
+  const [result] = await pool.execute(
+    `UPDATE users SET name = ? WHERE id = ?`,
+    [name, userId]
+  );
+  return result.affectedRows > 0;
 }
 
 module.exports = {
@@ -71,4 +100,5 @@ module.exports = {
   findByEmail,
   findByEmailWithPassword,
   findById,
+  updateName,
 };
