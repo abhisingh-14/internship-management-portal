@@ -40,6 +40,7 @@ const env = {
   nodeEnv: process.env.NODE_ENV,
   port: Number(process.env.PORT),
   clientOrigin: process.env.CLIENT_ORIGIN,
+  logLevel: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
 
   db: {
     host: process.env.DB_HOST,
@@ -50,14 +51,19 @@ const env = {
   },
 
   jwt: {
-    accessSecret: process.env.JWT_SECRET,
-    accessExpiresIn: process.env.JWT_EXPIRES_IN,
+    secret: process.env.JWT_SECRET,
+    expiresIn: process.env.JWT_EXPIRES_IN,
     refreshSecret: process.env.JWT_REFRESH_SECRET,
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
   },
 
   bcrypt: {
     saltRounds: Number(process.env.BCRYPT_SALT_ROUNDS),
+  },
+
+  upload: {
+    maxResumeSizeMb: Number(process.env.MAX_RESUME_SIZE_MB) || 5,
+    maxLogoSizeMb: Number(process.env.MAX_LOGO_SIZE_MB) || 2,
   },
 
   isProduction: process.env.NODE_ENV === 'production',

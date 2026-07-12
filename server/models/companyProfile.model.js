@@ -1,69 +1,174 @@
 const { pool } = require('../config/db');
 
-/**
- * Inserts a new company_profiles row linked to a user, defaulting to
- * 'pending' approval status, per FR-COM-01 / FR-COM-02.
- * Accepts an optional transaction connection so the Authentication
- * component can create the user + profile atomically.
- */
-async function insertCompanyProfile(connection, userId, companyName) {
-  const executor = connection || pool;
-  const [result] = await executor.query(
-    `INSERT INTO company_profiles (user_id, company_name, approval_status)
-     VALUES (?, ?, 'pending')`,
-    [userId, companyName]
-  );
-  return result.insertId;
+function mapProfileRow(row) {
+  if (!row) {
+    return null;
+  }
+  return {
+    id: row.id,
+    userId: row.user_id,
+    companyName: row.company_name,
+    description: row.description,
+    website: row.website,
+    industry: row.industry,
+    logoUrl: row.logo_url,
+    approvalStatus: row.approval_status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }
 
 /**
- * Finds a company profile by the owning user's id.
- * Never selects password_hash (that lives on the users table anyway).
+ * Finds a company's profile by their users.id.
  */
 async function findByUserId(userId) {
   const [rows] = await pool.query(
-    `SELECT id, user_id, company_name, description, website, industry, logo_url,
-            approval_status, created_at, updated_at
+    `SELECT id, user_id, company_name, description, website, industry,
+            logo_url, approval_status, created_at, updated_at
      FROM company_profiles
-     WHERE user_id = ?`,
+     WHERE user_id = ?
+     LIMIT 1`,
     [userId]
   );
-  return rows[0] || null;
+  return mapProfileRow(rows[0]);
 }
 
 /**
- * Finds a company profile by its own primary key.
+ * Finds a company's public-facing profile by company_profiles.id, for the
+ * public GET /companies/:companyId endpoint. Excludes internal-only fields
+ * that shouldn't be shown to unauthenticated visitors (approvalStatus is
+ * kept since a browsing student may reasonably see whether a company is
+ * verified).
  */
-async function findById(companyProfileId) {
+async function findPublicProfileById(companyId) {
   const [rows] = await pool.query(
-    `SELECT id, user_id, company_name, description, website, industry, logo_url,
-            approval_status, created_at, updated_at
+    `SELECT id, company_name, description, website, industry, logo_url,
+            approval_status, created_at
      FROM company_profiles
-     WHERE id = ?`,
-    [companyProfileId]
+     WHERE id = ?
+     LIMIT 1`,
+    [companyId]
   );
-  return rows[0] || null;
+  const row = rows[0];
+  if (!row) {
+    return null;
+  }
+  return {
+    id: row.id,
+    companyName: row.company_name,
+    description: row.description,
+    website: row.website,
+    industry: row.industry,
+    logoUrl: row.logo_url,
+    approvalStatus: row.approval_status,
+    createdAt: row.created_at,
+  };
 }
 
 /**
- * Updates the editable profile fields for a company (companyName,
- * description, website, industry). logoUrl is intentionally excluded —
- * it is managed exclusively by the File Upload component (Component 08).
- * approvalStatus is intentionally excluded — only Admins may change it.
+ * Updates a company's editable profile fields (companyName, description,
+ * website, industry). Only supplied fields are updated; approvalStatus and
+ * logoUrl are intentionally excluded per docs/07_Company_Module.md.
  */
-async function updateProfile(userId, { companyName, description, website, industry }) {
+async function updateProfileFields(userId, fields) {
+  const columnMap = {
+    companyName: 'company_name',
+    description: 'description',
+    website: 'website',
+    industry: 'industry',
+  };
+
+  const setClauses = [];
+  const values = [];
+
+  Object.entries(fields).forEach(([key, value]) => {
+    if (value !== undefined && columnMap[key]) {
+      setClauses.push(`${columnMap[key]} = ?`);
+      values.push(value);
+    }
+  });
+
+  if (setClauses.length === 0) {
+    return findByUserId(userId);
+  }
+
+  values.push(userId);
   await pool.query(
-    `UPDATE company_profiles
-     SET company_name = ?, description = ?, website = ?, industry = ?
-     WHERE user_id = ?`,
-    [companyName, description, website, industry, userId]
+    `UPDATE company_profiles SET ${setClauses.join(', ')} WHERE user_id = ?`,
+    values
   );
   return findByUserId(userId);
 }
 
+/**
+ * Sets logo_url to the given value, replacing whatever was previously
+ * stored. The caller is responsible for deleting the old file from disk
+ * beforehand via fileStorage.deleteLogoFileIfExists.
+ */
+async function updateLogoUrl(userId, logoUrl) {
+  await pool.query(
+    'UPDATE company_profiles SET logo_url = ? WHERE user_id = ?',
+    [logoUrl, userId]
+  );
+  return findByUserId(userId);
+}
+
+/**
+ * Returns only the current logo_url for a company, or null if none is on
+ * file. Used to locate the on-disk file to delete before replacing it.
+ */
+async function findLogoUrlByUserId(userId) {
+  const [rows] = await pool.query(
+    'SELECT logo_url FROM company_profiles WHERE user_id = ? LIMIT 1',
+    [userId]
+  );
+  return rows[0] ? rows[0].logo_url : null;
+}
+
+/**
+ * Returns internship posting counts by status for a company, used by
+ * GET /companies/dashboard.
+ */
+async function countInternshipsByStatus(companyProfileId) {
+  const [rows] = await pool.query(
+    `SELECT status, COUNT(*) AS count
+     FROM internships
+     WHERE company_id = ?
+     GROUP BY status`,
+    [companyProfileId]
+  );
+
+  const stats = { total: 0, draft: 0, published: 0, closed: 0, flagged: 0, removed: 0 };
+  rows.forEach((row) => {
+    stats[row.status] = Number(row.count);
+    stats.total += Number(row.count);
+  });
+  return stats;
+}
+
+/**
+ * Inserts a new company profile row linked to a user. Intended to be
+ * called inside the same transaction as the corresponding `users` insert
+ * during registration (see auth.controller.js).
+ *
+ * @param {import('mysql2/promise').PoolConnection} connection
+ * @param {number} userId
+ * @param {string} companyName
+ */
+async function createCompanyProfile(connection, userId, companyName) {
+  await connection.execute(
+    `INSERT INTO company_profiles (user_id, company_name, approval_status)
+     VALUES (?, ?, 'pending')`,
+    [userId, companyName]
+  );
+}
+
 module.exports = {
-  insertCompanyProfile,
+  createCompanyProfile,
   findByUserId,
-  findById,
-  updateProfile,
+  findPublicProfileById,
+  updateProfileFields,
+  updateLogoUrl,
+  findLogoUrlByUserId,
+  countInternshipsByStatus,
 };

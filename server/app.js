@@ -18,8 +18,10 @@ const express = require('express');
 const cors = require('cors');
 
 const env = require('./config/env');
+const logger = require('./utils/logger');
 const { sendSuccess } = require('./utils/apiResponse');
 const apiRouter = require('./routes/index');
+const fileRoutes = require('./routes/file.routes');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -41,9 +43,20 @@ app.get('/health', (req, res) => {
   sendSuccess(res, { message: 'Server is healthy' });
 });
 
+// New in Component 08: uploaded resumes/logos are served through this
+// controlled router rather than an open express.static("/uploads") mount,
+// so access to resumes can be gated by authentication + ownership rules
+// (see server/controllers/file.controller.js and
+// docs/04_Project_Architecture.md §10). Mounted outside the /api/v1 prefix
+// so stored URLs match the exact "/uploads/resumes/..." /
+// "/uploads/logos/..." shape already documented in docs/03_API_Design.md.
+app.use('/uploads', fileRoutes);
+
 app.use('/api/v1', apiRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
+
+logger.info(`Express app configured for ${env.nodeEnv} environment.`);
 
 module.exports = app;

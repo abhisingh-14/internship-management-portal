@@ -1,6 +1,7 @@
 const asyncHandler = require('../utils/asyncHandler');
 const { sendSuccess } = require('../utils/apiResponse');
 const { NotFoundError, ConflictError } = require('../utils/apiError');
+const { buildResumeUrl, deleteResumeFileIfExists } = require('../utils/fileStorage');
 
 const userModel = require('../models/user.model');
 const studentProfileModel = require('../models/studentProfile.model');
@@ -139,6 +140,48 @@ const updateProfile = asyncHandler(async (req, res) => {
 });
 
 /**
+ * POST /students/resume
+ * multipart/form-data, field name "resume". Requires the `uploadResume`
+ * and `requireUploadedFile` middleware to have already run (see
+ * student.routes.js), so req.file is guaranteed to be present and valid
+ * (correct MIME type, within size limit) by the time this handler runs.
+ */
+const uploadResume = asyncHandler(async (req, res) => {
+  const previousResumeUrl = await studentProfileModel.findResumeUrlByUserId(req.user.userId);
+
+  // Persist the new file's URL first so a failure deleting the old file
+  // never leaves the student without a resume on record.
+  const newResumeUrl = buildResumeUrl(req.file.filename);
+  await studentProfileModel.updateResumeUrl(req.user.userId, newResumeUrl);
+
+  if (previousResumeUrl) {
+    await deleteResumeFileIfExists(previousResumeUrl);
+  }
+
+  sendSuccess(res, {
+    message: 'Resume uploaded successfully',
+    data: { resumeUrl: newResumeUrl },
+  });
+});
+
+/**
+ * DELETE /students/resume
+ */
+const deleteResume = asyncHandler(async (req, res, next) => {
+  const currentResumeUrl = await studentProfileModel.findResumeUrlByUserId(req.user.userId);
+
+  if (!currentResumeUrl) {
+    next(new NotFoundError('No resume is currently on file.'));
+    return;
+  }
+
+  await studentProfileModel.clearResumeUrl(req.user.userId);
+  await deleteResumeFileIfExists(currentResumeUrl);
+
+  res.status(204).send();
+});
+
+/**
  * GET /students/education
  * Returns every education entry belonging to the authenticated student.
  */
@@ -272,6 +315,8 @@ module.exports = {
   getDashboard,
   getProfile,
   updateProfile,
+  uploadResume,
+  deleteResume,
   getEducationList,
   addEducation,
   updateEducation,

@@ -12,8 +12,8 @@ const env = require('../config/env');
 function generateAccessToken(payload) {
   return jwt.sign(
     { userId: payload.userId, role: payload.role },
-    env.jwt.accessSecret,
-    { expiresIn: env.jwt.accessExpiresIn }
+    env.jwt.secret,
+    { expiresIn: env.jwt.expiresIn }
   );
 }
 
@@ -38,7 +38,7 @@ function generateRefreshToken(payload) {
  * @throws {jwt.JsonWebTokenError | jwt.TokenExpiredError}
  */
 function verifyAccessToken(token) {
-  return jwt.verify(token, env.jwt.accessSecret);
+  return jwt.verify(token, env.jwt.secret);
 }
 
 /**

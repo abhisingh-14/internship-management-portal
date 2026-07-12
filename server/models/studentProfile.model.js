@@ -1,4 +1,25 @@
-const pool = require('../config/db');
+const { pool } = require('../config/db');
+
+/**
+ * Maps a raw student_profiles row (joined with users.name/email) into the
+ * camelCase shape used across the API, per docs/03_API_Design.md §1.
+ * Never selects password_hash.
+ */
+function mapProfileRow(row) {
+  if (!row) {
+    return null;
+  }
+  return {
+    id: row.id,
+    userId: row.user_id,
+    name: row.name,
+    email: row.email,
+    bio: row.bio,
+    resumeUrl: row.resume_url,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
 
 /**
  * All parameterized SQL access for the `student_profiles` table.
@@ -111,10 +132,35 @@ async function updateResumeUrl(userId, resumeUrl) {
   return result.affectedRows > 0;
 }
 
+/**
+ * Clears resume_url back to NULL. Used by DELETE /students/resume.
+ */
+async function clearResumeUrl(userId) {
+  await pool.query(
+    'UPDATE student_profiles SET resume_url = NULL WHERE user_id = ?',
+    [userId]
+  );
+}
+
+/**
+ * Returns only the current resume_url for a student, or null if none is
+ * on file. Used to locate the on-disk file to delete before replacing or
+ * removing it, without fetching the full profile.
+ */
+async function findResumeUrlByUserId(userId) {
+  const [rows] = await pool.query(
+    'SELECT resume_url FROM student_profiles WHERE user_id = ? LIMIT 1',
+    [userId]
+  );
+  return rows[0] ? rows[0].resume_url : null;
+}
+
 module.exports = {
   createStudentProfile,
   findByUserId,
   findIdByUserId,
   updateBio,
   updateResumeUrl,
+  clearResumeUrl,
+  findResumeUrlByUserId,
 };

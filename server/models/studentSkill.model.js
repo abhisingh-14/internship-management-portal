@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+const { pool } = require('../config/db');
 
 /**
  * All parameterized SQL access for the `student_skills` table. Every

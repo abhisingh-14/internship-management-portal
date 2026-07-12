@@ -24,6 +24,8 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+TRUNCATE TABLE student_skills;
+TRUNCATE TABLE student_education;
 TRUNCATE TABLE notifications;
 TRUNCATE TABLE saved_internships;
 TRUNCATE TABLE applications;
@@ -50,23 +52,39 @@ INSERT INTO users (id, name, email, password_hash, role, account_status) VALUES
 -- -----------------------------------------------------------------------------
 -- student_profiles (one per student user)
 -- -----------------------------------------------------------------------------
-INSERT INTO student_profiles (id, user_id, education, skills, bio, resume_url) VALUES
-    (1, 2, 'B.Tech Computer Science, NIT Trichy',
-        JSON_ARRAY('React', 'Node.js', 'MySQL', 'JavaScript'),
-        'Aspiring full-stack developer passionate about building scalable web applications.',
-        '/uploads/resumes/jane-doe-resume.pdf'),
-    (2, 3, 'B.Sc Information Technology, Delhi University',
-        JSON_ARRAY('Node.js', 'Express', 'MongoDB', 'Docker'),
-        'Backend-focused engineer with a growing interest in distributed systems.',
-        '/uploads/resumes/john-smith-resume.pdf'),
-    (3, 4, 'B.Tech Electronics & Communication, IIIT Hyderabad',
-        JSON_ARRAY('Python', 'Data Analysis', 'SQL', 'Pandas'),
-        'Data enthusiast exploring analytics and machine learning fundamentals.',
-        '/uploads/resumes/priya-sharma-resume.pdf'),
-    (4, 5, 'B.Com, University of Mumbai',
-        JSON_ARRAY('Excel', 'Communication'),
-        'Deactivated account retained for historical application records.',
-        NULL);
+INSERT INTO student_profiles (id, user_id, bio, resume_url) VALUES
+    (1, 2, 'Aspiring full-stack developer passionate about building scalable web applications.', '/uploads/resumes/jane-doe-resume.pdf'),
+    (2, 3, 'Backend-focused engineer with a growing interest in distributed systems.', '/uploads/resumes/john-smith-resume.pdf'),
+    (3, 4, 'Data enthusiast exploring analytics and machine learning fundamentals.', '/uploads/resumes/priya-sharma-resume.pdf'),
+    (4, 5, 'Deactivated account retained for historical application records.', NULL);
+
+-- -----------------------------------------------------------------------------
+-- student_education
+-- -----------------------------------------------------------------------------
+INSERT INTO student_education (id, student_id, institution_name, degree, field_of_study, start_date, end_date, is_current, grade, description) VALUES
+    (1, 1, 'NIT Trichy', 'B.Tech', 'Computer Science', '2022-07-01', '2026-05-31', FALSE, '8.5 CGPA', 'Relevant coursework: Data Structures, Algorithms, Web Development'),
+    (2, 2, 'Delhi University', 'B.Sc', 'Information Technology', '2022-07-01', '2025-05-31', FALSE, '7.8 CGPA', 'Focused on software engineering and database systems'),
+    (3, 3, 'IIIT Hyderabad', 'B.Tech', 'Electronics & Communication', '2022-07-01', '2026-05-31', FALSE, '9.0 CGPA', 'Focus on signal processing and data analytics'),
+    (4, 4, 'University of Mumbai', 'B.Com', 'Commerce', '2021-07-01', '2024-05-31', FALSE, 'A Grade', 'General commerce education');
+
+-- -----------------------------------------------------------------------------
+-- student_skills
+-- -----------------------------------------------------------------------------
+INSERT INTO student_skills (id, student_id, skill_name, proficiency_level) VALUES
+    (1, 1, 'React', 'advanced'),
+    (2, 1, 'Node.js', 'intermediate'),
+    (3, 1, 'MySQL', 'intermediate'),
+    (4, 1, 'JavaScript', 'advanced'),
+    (5, 2, 'Node.js', 'intermediate'),
+    (6, 2, 'Express', 'intermediate'),
+    (7, 2, 'MongoDB', 'intermediate'),
+    (8, 2, 'Docker', 'beginner'),
+    (9, 3, 'Python', 'advanced'),
+    (10, 3, 'Data Analysis', 'intermediate'),
+    (11, 3, 'SQL', 'intermediate'),
+    (12, 3, 'Pandas', 'intermediate'),
+    (13, 4, 'Excel', 'intermediate'),
+    (14, 4, 'Communication', 'intermediate');
 
 -- -----------------------------------------------------------------------------
 -- company_profiles (one per company user; mixed approval states)

@@ -1,7 +1,8 @@
 const express = require('express');
 const authenticate = require('../middleware/authenticate');
 const authorize = require('../middleware/authorize');
-const validateRequest = require('../middleware/validateRequest');
+const validateRequest = require('../utils/validateRequest');
+const { uploadResume, requireUploadedFile } = require('../middleware/upload');
 const studentController = require('../controllers/student.controller');
 const {
   updateProfileValidator,
@@ -30,6 +31,15 @@ router.put(
   validateRequest,
   studentController.updateProfile
 );
+
+router.post(
+  '/resume',
+  uploadResume,
+  requireUploadedFile('resume'),
+  studentController.uploadResume
+);
+
+router.delete('/resume', studentController.deleteResume);
 
 // Education
 router.get('/education', studentController.getEducationList);

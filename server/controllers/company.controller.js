@@ -3,6 +3,7 @@ const internshipModel = require('../models/internship.model');
 const { NotFoundError } = require('../utils/apiError');
 const { sendSuccess } = require('../utils/apiResponse');
 const asyncHandler = require('../utils/asyncHandler');
+const { buildLogoUrl, deleteLogoFileIfExists } = require('../utils/fileStorage');
 
 /**
  * Fields considered when computing profile completeness. logoUrl is
@@ -99,7 +100,7 @@ const updateProfile = asyncHandler(async (req, res) => {
 
   const { companyName, description, website, industry } = req.body;
 
-  const updatedProfileRow = await companyProfileModel.updateProfile(req.user.id, {
+  const updatedProfileRow = await companyProfileModel.updateProfileFields(req.user.id, {
     companyName: companyName !== undefined ? companyName : existingProfileRow.company_name,
     description: description !== undefined ? description : existingProfileRow.description,
     website: website !== undefined ? website : existingProfileRow.website,
@@ -112,8 +113,48 @@ const updateProfile = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * GET /companies/:companyId
+ * Public endpoint — no authentication required.
+ */
+const getPublicProfile = asyncHandler(async (req, res, next) => {
+  const companyId = Number(req.params.companyId);
+  const profile = await companyProfileModel.findPublicProfileById(companyId);
+
+  if (!profile) {
+    next(new NotFoundError('Company not found.'));
+    return;
+  }
+
+  sendSuccess(res, { message: 'Company profile retrieved', data: profile });
+});
+
+/**
+ * POST /companies/logo
+ * multipart/form-data, field name "logo". Requires the `uploadLogo` and
+ * `requireUploadedFile` middleware to have already run (see
+ * company.routes.js).
+ */
+const uploadLogo = asyncHandler(async (req, res) => {
+  const previousLogoUrl = await companyProfileModel.findLogoUrlByUserId(req.user.userId);
+
+  const newLogoUrl = buildLogoUrl(req.file.filename);
+  await companyProfileModel.updateLogoUrl(req.user.userId, newLogoUrl);
+
+  if (previousLogoUrl) {
+    await deleteLogoFileIfExists(previousLogoUrl);
+  }
+
+  sendSuccess(res, {
+    message: 'Logo uploaded successfully',
+    data: { logoUrl: newLogoUrl },
+  });
+});
+
 module.exports = {
   getDashboard,
   getProfile,
   updateProfile,
+  getPublicProfile,
+  uploadLogo,
 };

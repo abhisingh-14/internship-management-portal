@@ -1,7 +1,8 @@
 const express = require('express');
 const authenticate = require('../middleware/authenticate');
 const authorize = require('../middleware/authorize');
-const validateRequest = require('../middleware/validateRequest');
+const validateRequest = require('../utils/validateRequest');
+const { uploadLogo, requireUploadedFile } = require('../middleware/upload');
 const { updateCompanyProfileValidator } = require('../validators/company.validator');
 const companyController = require('../controllers/company.controller');
 
@@ -22,5 +23,18 @@ router.put(
   validateRequest,
   companyController.updateProfile
 );
+
+router.post(
+  '/logo',
+  authenticate,
+  authorize('company'),
+  uploadLogo,
+  requireUploadedFile('logo'),
+  companyController.uploadLogo
+);
+
+// Public route - no authentication required. Declared last so it only
+// catches company IDs that don't match one of the literal paths above.
+router.get('/:companyId', companyController.getPublicProfile);
 
 module.exports = router;

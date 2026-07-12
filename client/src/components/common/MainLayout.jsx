@@ -44,7 +44,7 @@ function MainLayout() {
 
   return (
     <div className="d-flex flex-column min-vh-100">
-      <Navbar onToggleSidebar={toggleSidebar} />
+      <Navbar onSidebarToggle={toggleSidebar} />
       <div className="d-flex flex-grow-1">
         <Sidebar items={sidebarItems} isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
         <main className="flex-grow-1 p-3">

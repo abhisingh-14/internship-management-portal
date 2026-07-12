@@ -1,4 +1,19 @@
-const pool = require('../config/db');
+const { pool } = require('../config/db');
+
+function mapSafeUserRow(row) {
+  if (!row) {
+    return null;
+  }
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    role: row.role,
+    accountStatus: row.account_status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
 
 /**
  * All parameterized SQL access for the `users` table. Every query
@@ -41,7 +56,7 @@ async function findByEmail(email) {
      LIMIT 1`,
     [email]
   );
-  return rows[0] || null;
+  return mapSafeUserRow(rows[0]);
 }
 
 /**
@@ -77,7 +92,7 @@ async function findById(userId) {
      LIMIT 1`,
     [userId]
   );
-  return rows[0] || null;
+  return mapSafeUserRow(rows[0]);
 }
 
 /**
