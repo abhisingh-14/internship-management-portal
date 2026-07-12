@@ -5,6 +5,8 @@ const validateRequest = require('../utils/validateRequest');
 const { uploadLogo, requireUploadedFile } = require('../middleware/upload');
 const { updateCompanyProfileValidator } = require('../validators/company.validator');
 const companyController = require('../controllers/company.controller');
+const applicationController = require('../controllers/application.controller');
+const { queryValidator } = require('../validators/application.validator');
 
 const router = express.Router();
 
@@ -31,6 +33,16 @@ router.post(
   uploadLogo,
   requireUploadedFile('logo'),
   companyController.uploadLogo
+);
+
+// GET /api/v1/companies/applicants
+router.get(
+  '/applicants',
+  authenticate,
+  authorize('company'),
+  queryValidator,
+  validateRequest,
+  applicationController.getCompanyApplicants
 );
 
 // Public route - no authentication required. Declared last so it only

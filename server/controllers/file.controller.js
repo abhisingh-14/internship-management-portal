@@ -4,6 +4,8 @@ const asyncHandler = require('../utils/asyncHandler');
 const { NotFoundError, ForbiddenError } = require('../utils/apiError');
 const { RESUME_DIR, LOGO_DIR } = require('../middleware/upload');
 const studentProfileModel = require('../models/studentProfile.model');
+const companyProfileModel = require('../models/companyProfile.model');
+const { pool } = require('../config/db');
 
 /**
  * GET /uploads/resumes/:filename
@@ -41,6 +43,33 @@ const serveResume = asyncHandler(async (req, res, next) => {
       next(new ForbiddenError('You do not have permission to access this resume.'));
       return;
     }
+    res.sendFile(filePath);
+    return;
+  }
+
+  if (req.user.role === 'company') {
+    const companyProfile = await companyProfileModel.findByUserId(req.user.userId);
+    if (!companyProfile) {
+      next(new ForbiddenError('You do not have permission to access this resume.'));
+      return;
+    }
+
+    const [rows] = await pool.query(
+      `SELECT a.id 
+       FROM applications a
+       INNER JOIN student_profiles sp ON sp.id = a.student_id
+       INNER JOIN internships i ON i.id = a.internship_id
+       WHERE sp.resume_url LIKE ? AND i.company_id = ?
+       LIMIT 1`,
+      [`%${filename}`, companyProfile.id]
+    );
+
+    const hasApplication = rows.length > 0;
+    if (!hasApplication) {
+      next(new ForbiddenError('You do not have permission to access this resume.'));
+      return;
+    }
+
     res.sendFile(filePath);
     return;
   }

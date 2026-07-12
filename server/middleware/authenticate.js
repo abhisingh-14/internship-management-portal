@@ -13,12 +13,17 @@ const userModel = require('../models/user.model');
  */
 const authenticate = asyncHandler(async (req, res, next) => {
   const authHeader = req.headers.authorization;
+  let token;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new UnauthorizedError('Authentication token is missing');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.query.token) {
+    token = req.query.token;
   }
 
-  const token = authHeader.split(' ')[1];
+  if (!token) {
+    throw new UnauthorizedError('Authentication token is missing');
+  }
 
   let decoded;
   try {
@@ -42,6 +47,7 @@ const authenticate = asyncHandler(async (req, res, next) => {
 
   req.user = {
     userId: user.id,
+    id: user.id,
     role: user.role,
     name: user.name,
     email: user.email,

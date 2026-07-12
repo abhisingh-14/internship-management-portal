@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 const STATUS_BADGE_CLASSES = {
@@ -54,6 +55,12 @@ function PostingsTable({ internships, onEdit, onDelete, onToggleStatus }) {
               </td>
               <td className="text-end">
                 <div className="btn-group btn-group-sm" role="group">
+                  <Link
+                    to={`/company/postings/${internship.id}/applicants`}
+                    className="btn btn-outline-info"
+                  >
+                    Applicants
+                  </Link>
                   <button type="button" className="btn btn-outline-primary" onClick={() => onEdit(internship)}>
                     Edit
                   </button>

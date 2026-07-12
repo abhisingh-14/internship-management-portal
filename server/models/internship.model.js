@@ -402,4 +402,5 @@ module.exports = {
   countApplicationsForInternship,
   deleteInternshipHard,
   softRemoveInternship,
+  getInternshipStatsByCompanyId,
 };

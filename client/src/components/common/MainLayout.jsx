@@ -11,20 +11,28 @@ const DESKTOP_BREAKPOINT_PX = 768;
 
 const DEFAULT_SIDEBAR_ITEMS = [{ label: 'Home', path: '/' }];
 
+const STUDENT_SIDEBAR_ITEMS = [
+  { label: 'Browse Internships', path: '/internships' },
+  { label: 'My Applications', path: '/student/applications' },
+  { label: 'Saved Internships', path: '/student/saved' },
+];
+
 const COMPANY_SIDEBAR_ITEMS = [
   { label: 'Dashboard', path: '/company/dashboard' },
   { label: 'Company Profile', path: '/company/profile' },
+  { label: 'Manage Postings', path: '/company/postings' },
+  { label: 'Applicants', path: '/company/applicants' },
 ];
 
 /**
  * Returns the navigation items Sidebar should render for the given role.
- * Student and Admin item sets are intentionally not added here — they
- * belong to the components that introduce those dashboards, following
- * the same pattern established for 'company' in this component.
  */
 function getSidebarItemsForRole(role) {
   if (role === 'company') {
     return COMPANY_SIDEBAR_ITEMS;
+  }
+  if (role === 'student') {
+    return STUDENT_SIDEBAR_ITEMS;
   }
   return DEFAULT_SIDEBAR_ITEMS;
 }

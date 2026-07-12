@@ -4,6 +4,8 @@ const authorize = require('../middleware/authorize');
 const validateRequest = require('../utils/validateRequest');
 const { uploadResume, requireUploadedFile } = require('../middleware/upload');
 const studentController = require('../controllers/student.controller');
+const applicationController = require('../controllers/application.controller');
+const { queryValidator } = require('../validators/application.validator');
 const {
   updateProfileValidator,
   createEducationValidator,
@@ -82,5 +84,8 @@ router.delete(
   validateRequest,
   studentController.deleteSkill
 );
+
+// Applications
+router.get('/applications', queryValidator, validateRequest, applicationController.getStudentApplications);
 
 module.exports = router;

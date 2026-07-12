@@ -11,6 +11,8 @@ const {
   publicSearchValidator,
 } = require('../validators/internship.validator');
 const internshipController = require('../controllers/internship.controller');
+const applicationController = require('../controllers/application.controller');
+const { applyValidator, queryValidator } = require('../validators/application.validator');
 
 const router = express.Router();
 
@@ -60,6 +62,26 @@ router.delete(
   authenticate,
   authorize('company'),
   internshipController.deleteInternship
+);
+
+// GET /api/v1/internships/:internshipId/applications
+router.get(
+  '/:internshipId/applications',
+  authenticate,
+  authorize('company', 'admin'),
+  queryValidator,
+  validateRequest,
+  applicationController.getInternshipApplications
+);
+
+// POST /api/v1/internships/:internshipId/applications
+router.post(
+  '/:internshipId/applications',
+  authenticate,
+  authorize('student'),
+  applyValidator,
+  validateRequest,
+  applicationController.applyForInternship
 );
 
 module.exports = router;
