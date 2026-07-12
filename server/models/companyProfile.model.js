@@ -163,6 +163,37 @@ async function createCompanyProfile(connection, userId, companyName) {
   );
 }
 
+/**
+ * Finds a company's profile by their company_profiles.id.
+ * @param {number} companyId
+ * @returns {Promise<object|null>}
+ */
+async function findById(companyId) {
+  const [rows] = await pool.query(
+    `SELECT id, user_id, company_name, description, website, industry,
+            logo_url, approval_status, created_at, updated_at
+     FROM company_profiles
+     WHERE id = ?
+     LIMIT 1`,
+    [companyId]
+  );
+  return mapProfileRow(rows[0]);
+}
+
+/**
+ * Updates the approval status of a company.
+ * @param {number} companyId
+ * @param {'approved'|'rejected'} approvalStatus
+ * @returns {Promise<object|null>}
+ */
+async function updateApprovalStatus(companyId, approvalStatus) {
+  await pool.query(
+    'UPDATE company_profiles SET approval_status = ? WHERE id = ?',
+    [approvalStatus, companyId]
+  );
+  return findById(companyId);
+}
+
 module.exports = {
   createCompanyProfile,
   findByUserId,
@@ -171,4 +202,6 @@ module.exports = {
   updateLogoUrl,
   findLogoUrlByUserId,
   countInternshipsByStatus,
+  findById,
+  updateApprovalStatus,
 };

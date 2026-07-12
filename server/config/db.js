@@ -34,4 +34,29 @@ async function testConnection() {
   }
 }
 
-module.exports = { pool, testConnection };
+async function initializeDatabase() {
+  const connection = await pool.getConnection();
+  try {
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS admin_audit_logs (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        actor_id INT UNSIGNED NOT NULL,
+        action VARCHAR(100) NOT NULL,
+        target_id VARCHAR(100) NOT NULL,
+        details TEXT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT fk_admin_audit_logs_actor
+          FOREIGN KEY (actor_id) REFERENCES users (id)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE,
+        INDEX idx_admin_audit_logs_actor (actor_id),
+        INDEX idx_admin_audit_logs_action (action),
+        INDEX idx_admin_audit_logs_created_at (created_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Audit log for administrative actions';
+    `);
+  } finally {
+    connection.release();
+  }
+}
+
+module.exports = { pool, testConnection, initializeDatabase };

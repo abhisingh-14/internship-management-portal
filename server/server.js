@@ -13,12 +13,15 @@
 const app = require('./app');
 const env = require('./config/env');
 const logger = require('./utils/logger');
-const { testConnection } = require('./config/db');
+const { testConnection, initializeDatabase } = require('./config/db');
 
 async function startServer() {
   try {
     await testConnection();
     logger.info('Database connection established.');
+
+    await initializeDatabase();
+    logger.info('Database tables initialized.');
 
     app.listen(env.port, () => {
       logger.info(`Server running in ${env.nodeEnv} mode on port ${env.port}`);

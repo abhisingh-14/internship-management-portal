@@ -21,6 +21,14 @@ import ManagePostings from '../pages/company/ManagePostings';
 import StudentApplications from '../pages/student/StudentApplications';
 import SavedInternships from '../pages/student/SavedInternships';
 import CompanyApplicants from '../pages/company/CompanyApplicants';
+import Notifications from '../pages/shared/Notifications';
+
+import AdminDashboard from '../pages/admin/Dashboard';
+import AdminUsers from '../pages/admin/Users';
+import AdminCompanies from '../pages/admin/Companies';
+import AdminInternships from '../pages/admin/Internships';
+import AdminApplications from '../pages/admin/Applications';
+import AdminAuditLogs from '../pages/admin/AuditLogs';
 
 function AppRoutes() {
   return (
@@ -36,6 +44,8 @@ function AppRoutes() {
         <Route path="internships/:internshipId" element={<InternshipDetails />} />
 
         <Route element={<ProtectedRoute />}>
+          <Route path="notifications" element={<Notifications />} />
+
           <Route element={<RoleRoute allowedRoles={['company']} />}>
             <Route path="company/dashboard" element={<CompanyDashboard />} />
             <Route path="company/profile" element={<CompanyProfile />} />
@@ -51,7 +61,15 @@ function AppRoutes() {
             <Route path="student/saved" element={<SavedInternships />} />
           </Route>
 
-          {/* Reserved for future components: admin/* role-guarded branches */}
+          {/* Component 14 — Admin Module */}
+          <Route element={<RoleRoute allowedRoles={['admin']} />}>
+            <Route path="admin/dashboard" element={<AdminDashboard />} />
+            <Route path="admin/users" element={<AdminUsers />} />
+            <Route path="admin/companies" element={<AdminCompanies />} />
+            <Route path="admin/internships" element={<AdminInternships />} />
+            <Route path="admin/applications" element={<AdminApplications />} />
+            <Route path="admin/audit-logs" element={<AdminAuditLogs />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<NotFound />} />

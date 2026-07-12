@@ -9,9 +9,9 @@ const internshipRoutes = require('./internship.routes');
 // components as each resource is implemented:
 const applicationRoutes = require('./application.routes');
 const savedInternshipRoutes = require('./savedInternship.routes');
-// const notificationRoutes = require('./notification.routes');
-// const adminRoutes = require('./admin.routes');
-// const analyticsRoutes = require('./analytics.routes');
+const notificationRoutes = require('./notification.routes');
+const adminRoutes = require('./admin.routes');
+const analyticsRoutes = require('./analytics.routes');
 
 const router = express.Router();
 
@@ -23,8 +23,8 @@ router.use('/internships', internshipRoutes);
 
 router.use('/applications', applicationRoutes);
 router.use('/bookmarks', savedInternshipRoutes);
-// router.use('/notifications', notificationRoutes);
-// router.use('/admin', adminRoutes);
-// router.use('/analytics', analyticsRoutes);
+router.use('/notifications', notificationRoutes);
+router.use('/admin', adminRoutes);
+router.use('/analytics', analyticsRoutes);
 
 module.exports = router;

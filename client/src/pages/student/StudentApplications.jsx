@@ -35,6 +35,7 @@ function StudentApplications() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedApplication, setSelectedApplication] = useState(null);
+  const [withdrawTarget, setWithdrawTarget] = useState(null); // { id, title }
 
   // Resume states
   const [resumeUrl, setResumeUrl] = useState(null);
@@ -118,13 +119,18 @@ function StudentApplications() {
     }
   };
 
-  const handleWithdraw = async (applicationId, title) => {
-    const confirmed = window.confirm(`Are you sure you want to withdraw your application for "${title}"? This cannot be undone.`);
-    if (!confirmed) return;
+  const handleWithdraw = (applicationId, title) => {
+    // Open inline confirmation modal instead of window.confirm
+    setWithdrawTarget({ id: applicationId, title });
+  };
 
+  const confirmWithdraw = async () => {
+    if (!withdrawTarget) return;
+    const { id, title } = withdrawTarget;
+    setWithdrawTarget(null);
     try {
-      await withdrawApplication(applicationId);
-      setAlert({ type: 'success', message: 'Application withdrawn successfully' });
+      await withdrawApplication(id);
+      setAlert({ type: 'success', message: `Application for "${title}" withdrawn successfully` });
       await fetchApplications();
     } catch (error) {
       setAlert({ type: 'danger', message: error.message || 'Failed to withdraw application' });
@@ -352,6 +358,47 @@ function StudentApplications() {
                   onClick={() => setSelectedApplication(null)}
                 >
                   Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Withdraw Confirmation Modal */}
+      {withdrawTarget && (
+        <div className="modal d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm Withdrawal</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setWithdrawTarget(null)}
+                  aria-label="Close"
+                />
+              </div>
+              <div className="modal-body">
+                <p>
+                  Are you sure you want to withdraw your application for{' '}
+                  <strong>&quot;{withdrawTarget.title}&quot;</strong>? This cannot be undone.
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setWithdrawTarget(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={confirmWithdraw}
+                >
+                  Yes, Withdraw
                 </button>
               </div>
             </div>

@@ -65,7 +65,7 @@ const getDashboard = asyncHandler(async (req, res) => {
         name: profile.name,
         email: profile.email,
         bio: profile.bio,
-        resumeUrl: profile.resume_url,
+        resumeUrl: profile.resumeUrl,
       },
       educationCount: education.length,
       skillsCount: skills.length,
@@ -98,7 +98,7 @@ const getProfile = asyncHandler(async (req, res) => {
       name: profile.name,
       email: profile.email,
       bio: profile.bio,
-      resumeUrl: profile.resume_url,
+      resumeUrl: profile.resumeUrl,
       education,
       skills,
     },
@@ -134,7 +134,7 @@ const updateProfile = asyncHandler(async (req, res) => {
       name: profile.name,
       email: profile.email,
       bio: profile.bio,
-      resumeUrl: profile.resume_url,
+      resumeUrl: profile.resumeUrl,
     },
   });
 });

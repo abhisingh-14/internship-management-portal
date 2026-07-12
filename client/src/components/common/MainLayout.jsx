@@ -15,6 +15,7 @@ const STUDENT_SIDEBAR_ITEMS = [
   { label: 'Browse Internships', path: '/internships' },
   { label: 'My Applications', path: '/student/applications' },
   { label: 'Saved Internships', path: '/student/saved' },
+  { label: 'Notifications', path: '/notifications' },
 ];
 
 const COMPANY_SIDEBAR_ITEMS = [
@@ -22,12 +23,26 @@ const COMPANY_SIDEBAR_ITEMS = [
   { label: 'Company Profile', path: '/company/profile' },
   { label: 'Manage Postings', path: '/company/postings' },
   { label: 'Applicants', path: '/company/applicants' },
+  { label: 'Notifications', path: '/notifications' },
+];
+
+const ADMIN_SIDEBAR_ITEMS = [
+  { label: 'Admin Dashboard', path: '/admin/dashboard' },
+  { label: 'Manage Users', path: '/admin/users' },
+  { label: 'Verify Companies', path: '/admin/companies' },
+  { label: 'Manage Internships', path: '/admin/internships' },
+  { label: 'View Applications', path: '/admin/applications' },
+  { label: 'Audit Logs', path: '/admin/audit-logs' },
+  { label: 'Notifications', path: '/notifications' },
 ];
 
 /**
  * Returns the navigation items Sidebar should render for the given role.
  */
 function getSidebarItemsForRole(role) {
+  if (role === 'admin') {
+    return ADMIN_SIDEBAR_ITEMS;
+  }
   if (role === 'company') {
     return COMPANY_SIDEBAR_ITEMS;
   }
