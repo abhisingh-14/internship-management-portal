@@ -7,11 +7,11 @@ import AlertMessage from '../../components/common/AlertMessage';
 import Loader from '../../components/common/Loader';
 
 function Login() {
-  const { login, isSubmitting } = useAuth();
+  const { login, logout, isSubmitting } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: '', password: '', role: 'student' });
   const [fieldErrors, setFieldErrors] = useState({});
   const [formError, setFormError] = useState(null);
 
@@ -20,13 +20,46 @@ function Login() {
     setFormData((previous) => ({ ...previous, [name]: value }));
   };
 
+  const validateForm = () => {
+    const errors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!formData.email.trim()) {
+      errors.email = 'Email address is required';
+    } else if (!emailRegex.test(formData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    if (!formData.password) {
+      errors.password = 'Password is required';
+    }
+
+    return errors;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setFormError(null);
     setFieldErrors({});
 
+    const clientErrors = validateForm();
+    if (Object.keys(clientErrors).length > 0) {
+      setFieldErrors(clientErrors);
+      return;
+    }
+
     try {
-      await login(formData);
+      const user = await login({ email: formData.email, password: formData.password });
+      
+      // Post-auth validation: verify that the user's role matches the selected role
+      // Admin accounts are exempt and can log in as either role
+      if (user.role !== 'admin' && user.role !== formData.role) {
+        await logout(); // Clear context state and stored local session
+        const actualRoleLabel = user.role === 'student' ? 'Student' : 'Company';
+        setFormError(`This email is registered as a ${actualRoleLabel}. Please select '${actualRoleLabel}' to log in.`);
+        return;
+      }
+
       const redirectTo = location.state?.from?.pathname || '/';
       navigate(redirectTo, { replace: true });
     } catch (error) {
@@ -53,6 +86,37 @@ function Login() {
           )}
 
           <form onSubmit={handleSubmit} noValidate>
+            <div className="mb-3">
+              <label className="form-label d-block">Log in as...</label>
+              <div className="btn-group w-100" role="group" aria-label="Role type">
+                <input
+                  type="radio"
+                  className="btn-check"
+                  name="role"
+                  id="roleStudent"
+                  value="student"
+                  checked={formData.role === 'student'}
+                  onChange={handleChange}
+                />
+                <label className="btn btn-outline-primary" htmlFor="roleStudent">
+                  Student
+                </label>
+
+                <input
+                  type="radio"
+                  className="btn-check"
+                  name="role"
+                  id="roleCompany"
+                  value="company"
+                  checked={formData.role === 'company'}
+                  onChange={handleChange}
+                />
+                <label className="btn btn-outline-primary" htmlFor="roleCompany">
+                  Company
+                </label>
+              </div>
+            </div>
+
             <div className="mb-3">
               <label htmlFor="email" className="form-label">
                 Email address
