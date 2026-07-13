@@ -56,7 +56,7 @@ validateAdminPassword();
 const env = {
   nodeEnv: process.env.NODE_ENV,
   port: Number(process.env.PORT),
-  clientOrigin: process.env.CLIENT_ORIGIN,
+  clientOrigin: process.env.CLIENT_ORIGIN ? process.env.CLIENT_ORIGIN.replace(/\/$/, '') : '',
   logLevel: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
 
   admin: {
