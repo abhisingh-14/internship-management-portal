@@ -40,9 +40,24 @@ app.use(express.urlencoded({ extended: true }));
  * in docs/03_API_Design.md; flagged for review before production
  * deployment (see 01_Project_Setup.md Notes).
  */
-app.get('/health', (req, res) => {
-  sendSuccess(res, { message: 'Server is healthy' });
+const { pool } = require('./config/db');
+app.get('/health', async (req, res) => {
+  try {
+    // Perform a simple query to verify database connectivity without exposing data
+    await pool.execute('SELECT 1');
+    sendSuccess(res, { 
+      message: 'Server is healthy', 
+      data: { 
+        status: 'UP', 
+        database: 'connected' 
+      } 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message, stack: error.stack });
+  }
 });
+
+
 
 // New in Component 08: uploaded resumes/logos are served through this
 // controlled router rather than an open express.static("/uploads") mount,

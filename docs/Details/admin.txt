@@ -1,0 +1,10 @@
+To add a admin 
+cd server
+node create_admin.js "Second Admin" "admin2@internshipportal.com" "SecurePass123!"
+
+or this
+INSERT INTO users (name, email, password_hash, role, account_status)
+VALUES ('Second Admin', 'admin2@internshipportal.com', '<YOUR_BCRYPT_HASH_HERE>', 'admin', 'active');
+
+for hashing
+node -e "require('bcrypt').hash('SecurePass123!', 10).then(console.log)"

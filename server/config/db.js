@@ -125,6 +125,46 @@ async function initializeDatabase() {
         }
       }
     }
+
+    // 4. Ensure default admin user exists and has correct credentials
+    const [adminRows] = await connection.execute(
+      'SELECT 1 FROM users WHERE email = ? LIMIT 1',
+      ['admin@internshipportal.com']
+    );
+
+    const bcrypt = require('bcrypt');
+    const passwordHash = await bcrypt.hash('Password123!', env.bcrypt.saltRounds || 10);
+
+    if (adminRows.length === 0) {
+      logger.info('Creating default admin user...');
+      await connection.execute(
+        `INSERT INTO users (name, email, password_hash, role, account_status)
+         VALUES (?, ?, ?, ?, ?)`,
+        [
+          'Platform Admin',
+          'admin@internshipportal.com',
+          passwordHash,
+          'admin',
+          'active',
+        ]
+      );
+      logger.info('Default admin user created.');
+    } else {
+      logger.info('Default admin user already exists. Enforcing correct credentials...');
+      await connection.execute(
+        `UPDATE users 
+         SET name = ?, password_hash = ?, role = ?, account_status = ? 
+         WHERE email = ?`,
+        [
+          'Platform Admin',
+          passwordHash,
+          'admin',
+          'active',
+          'admin@internshipportal.com',
+        ]
+      );
+      logger.info('Default admin user credentials enforced.');
+    }
   } finally {
     connection.release();
   }
