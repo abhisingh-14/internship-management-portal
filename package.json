@@ -8,6 +8,7 @@
     "install:client": "cd client && npm install",
     "install-all": "npm run install:server && npm run install:client",
     "build:client": "cd client && npm run build",
+    "build": "npm run install-all && npm run build:client",
     "start": "cd server && npm start",
     "dev:server": "cd server && npm run dev",
     "create-admin": "cd server && npm run create-admin",
