@@ -4,28 +4,27 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const REQUIRED_ENV_VARS = [
-  'NODE_ENV',
-  'PORT',
-  'CLIENT_ORIGIN',
-  'DB_HOST',
-  'DB_PORT',
-  'DB_USER',
-  'DB_PASSWORD',
-  'DB_NAME',
-  'JWT_SECRET',
-  'JWT_EXPIRES_IN',
-  'JWT_REFRESH_SECRET',
-  'JWT_REFRESH_EXPIRES_IN',
-  'BCRYPT_SALT_ROUNDS',
-  'ADMIN_EMAIL',
-  'ADMIN_PASSWORD',
-];
-
 function validateEnv() {
-  const missing = REQUIRED_ENV_VARS.filter(
-    (key) => process.env[key] === undefined || process.env[key] === ''
-  );
+  const missing = [];
+
+  if (!process.env.NODE_ENV) missing.push('NODE_ENV');
+  if (!process.env.CLIENT_ORIGIN) missing.push('CLIENT_ORIGIN');
+  if (!process.env.PORT) missing.push('PORT');
+
+  // Require either custom DB_* variables or Railway-provided MYSQL* variables
+  if (!process.env.DB_HOST && !process.env.MYSQLHOST) missing.push('DB_HOST / MYSQLHOST');
+  if (!process.env.DB_PORT && !process.env.MYSQLPORT) missing.push('DB_PORT / MYSQLPORT');
+  if (!process.env.DB_USER && !process.env.MYSQLUSER) missing.push('DB_USER / MYSQLUSER');
+  if (!process.env.DB_PASSWORD && !process.env.MYSQLPASSWORD) missing.push('DB_PASSWORD / MYSQLPASSWORD');
+  if (!process.env.DB_NAME && !process.env.MYSQLDATABASE) missing.push('DB_NAME / MYSQLDATABASE');
+
+  if (!process.env.JWT_SECRET) missing.push('JWT_SECRET');
+  if (!process.env.JWT_EXPIRES_IN) missing.push('JWT_EXPIRES_IN');
+  if (!process.env.JWT_REFRESH_SECRET) missing.push('JWT_REFRESH_SECRET');
+  if (!process.env.JWT_REFRESH_EXPIRES_IN) missing.push('JWT_REFRESH_EXPIRES_IN');
+  if (!process.env.BCRYPT_SALT_ROUNDS) missing.push('BCRYPT_SALT_ROUNDS');
+  if (!process.env.ADMIN_EMAIL) missing.push('ADMIN_EMAIL');
+  if (!process.env.ADMIN_PASSWORD) missing.push('ADMIN_PASSWORD');
 
   if (missing.length > 0) {
     // eslint-disable-next-line no-console
@@ -66,11 +65,11 @@ const env = {
   },
 
   db: {
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT),
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    name: process.env.DB_NAME,
+    host: process.env.MYSQLHOST || process.env.DB_HOST,
+    port: Number(process.env.MYSQLPORT || process.env.DB_PORT),
+    user: process.env.MYSQLUSER || process.env.DB_USER,
+    password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
+    name: process.env.MYSQLDATABASE || process.env.DB_NAME,
     connectionLimit: process.env.DB_CONNECTION_LIMIT
       ? Number(process.env.DB_CONNECTION_LIMIT)
       : undefined,
