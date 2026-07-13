@@ -18,6 +18,8 @@ const REQUIRED_ENV_VARS = [
   'JWT_REFRESH_SECRET',
   'JWT_REFRESH_EXPIRES_IN',
   'BCRYPT_SALT_ROUNDS',
+  'ADMIN_EMAIL',
+  'ADMIN_PASSWORD',
 ];
 
 function validateEnv() {
@@ -34,13 +36,34 @@ function validateEnv() {
   }
 }
 
+const INSECURE_ADMIN_PASSWORDS = ['password123!', 'admin123', 'changeme', 'password'];
+
+function validateAdminPassword() {
+  const adminPassword = process.env.ADMIN_PASSWORD || '';
+  if (adminPassword.length < 8) {
+    console.error('ADMIN_PASSWORD must be at least 8 characters long.');
+    process.exit(1);
+  }
+  if (INSECURE_ADMIN_PASSWORDS.includes(adminPassword.toLowerCase())) {
+    console.error(`ADMIN_PASSWORD is set to a well-known default value ("${adminPassword}"). Set a strong, unique value.`);
+    process.exit(1);
+  }
+}
+
 validateEnv();
+validateAdminPassword();
+
 
 const env = {
   nodeEnv: process.env.NODE_ENV,
   port: Number(process.env.PORT),
   clientOrigin: process.env.CLIENT_ORIGIN,
   logLevel: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
+
+  admin: {
+    email: process.env.ADMIN_EMAIL,
+    password: process.env.ADMIN_PASSWORD,
+  },
 
   db: {
     host: process.env.DB_HOST,

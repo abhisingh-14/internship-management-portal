@@ -127,13 +127,20 @@ async function initializeDatabase() {
     }
 
     // 4. Ensure default admin user exists and has correct credentials
+    const INSECURE_ADMIN_PASSWORDS = ['password123!', 'admin123', 'changeme', 'password'];
+    if (env.admin.password && INSECURE_ADMIN_PASSWORDS.includes(env.admin.password.toLowerCase())) {
+      logger.warn(
+        `ADMIN_PASSWORD matches a well-known default insecure value ("${env.admin.password}"). Please update to a secure password.`
+      );
+    }
+
     const [adminRows] = await connection.execute(
       'SELECT 1 FROM users WHERE email = ? LIMIT 1',
-      ['admin@internshipportal.com']
+      [env.admin.email]
     );
 
     const bcrypt = require('bcrypt');
-    const passwordHash = await bcrypt.hash('Password123!', env.bcrypt.saltRounds || 10);
+    const passwordHash = await bcrypt.hash(env.admin.password, env.bcrypt.saltRounds || 10);
 
     if (adminRows.length === 0) {
       logger.info('Creating default admin user...');
@@ -142,7 +149,7 @@ async function initializeDatabase() {
          VALUES (?, ?, ?, ?, ?)`,
         [
           'Platform Admin',
-          'admin@internshipportal.com',
+          env.admin.email,
           passwordHash,
           'admin',
           'active',
@@ -160,7 +167,7 @@ async function initializeDatabase() {
           passwordHash,
           'admin',
           'active',
-          'admin@internshipportal.com',
+          env.admin.email,
         ]
       );
       logger.info('Default admin user credentials enforced.');
