@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import * as adminService from '../../services/adminService';
+import { resolveFileUrl } from '../../utils/fileUrl';
 
 function AdminCompanies() {
   const [pendingCompanies, setPendingCompanies] = useState([]);
@@ -118,7 +119,7 @@ function AdminCompanies() {
                       <td>
                         <div className="d-flex align-items-center">
                           {company.logoUrl ? (
-                            <img src={company.logoUrl} alt="Logo" className="rounded-circle me-3 bg-light" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+                            <img src={resolveFileUrl(company.logoUrl)} alt="Logo" className="rounded-circle me-3 bg-light" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
                           ) : (
                             <div className="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px', fontSize: '1rem', fontWeight: 'bold' }}>
                               {company.companyName.charAt(0).toUpperCase()}

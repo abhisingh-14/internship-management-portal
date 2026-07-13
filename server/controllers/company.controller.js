@@ -27,14 +27,14 @@ function calculateProfileCompleteness(profile) {
 function toPublicProfile(profileRow) {
   return {
     id: profileRow.id,
-    companyName: profileRow.company_name,
+    companyName: profileRow.companyName,
     description: profileRow.description,
     website: profileRow.website,
     industry: profileRow.industry,
-    logoUrl: profileRow.logo_url,
-    approvalStatus: profileRow.approval_status,
-    createdAt: profileRow.created_at,
-    updatedAt: profileRow.updated_at,
+    logoUrl: profileRow.logoUrl,
+    approvalStatus: profileRow.approvalStatus,
+    createdAt: profileRow.createdAt,
+    updatedAt: profileRow.updatedAt,
   };
 }
 
@@ -101,7 +101,7 @@ const updateProfile = asyncHandler(async (req, res) => {
   const { companyName, description, website, industry } = req.body;
 
   const updatedProfileRow = await companyProfileModel.updateProfileFields(req.user.id, {
-    companyName: companyName !== undefined ? companyName : existingProfileRow.company_name,
+    companyName: companyName !== undefined ? companyName : existingProfileRow.companyName,
     description: description !== undefined ? description : existingProfileRow.description,
     website: website !== undefined ? website : existingProfileRow.website,
     industry: industry !== undefined ? industry : existingProfileRow.industry,

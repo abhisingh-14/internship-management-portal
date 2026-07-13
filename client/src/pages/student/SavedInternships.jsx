@@ -4,6 +4,7 @@ import Loader from '../../components/common/Loader';
 import AlertMessage from '../../components/common/AlertMessage';
 import Pagination from '../../components/common/Pagination';
 import { getSavedInternships, removeSavedInternship } from '../../services/savedInternshipService';
+import { resolveFileUrl } from '../../utils/fileUrl';
 
 const PAGE_SIZE = 10;
 
@@ -119,7 +120,7 @@ function SavedInternships() {
                       <div className="d-flex align-items-center">
                         {bookmark.internship.companyLogoUrl ? (
                           <img
-                            src={bookmark.internship.companyLogoUrl}
+                            src={resolveFileUrl(bookmark.internship.companyLogoUrl)}
                             alt={`${bookmark.internship.companyName} logo`}
                             className="rounded me-2"
                             style={{ width: '24px', height: '24px', objectFit: 'cover' }}

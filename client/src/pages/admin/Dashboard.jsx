@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import * as adminService from '../../services/adminService';
+import { getNotifications } from '../../services/notificationService';
+import { resolveFileUrl } from '../../utils/fileUrl';
 
 function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [pendingCompanies, setPendingCompanies] = useState([]);
+  const [recentNotifications, setRecentNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -18,11 +21,14 @@ function AdminDashboard() {
     setIsLoading(true);
     setError(null);
     try {
-      const statsData = await adminService.fetchPlatformAnalytics();
+      const [statsData, pendingData, notifData] = await Promise.all([
+        adminService.fetchPlatformAnalytics(),
+        adminService.fetchPendingCompanies({ limit: 5 }),
+        getNotifications({ page: 1, limit: 5 }),
+      ]);
       setStats(statsData);
-      
-      const pendingData = await adminService.fetchPendingCompanies({ limit: 5 });
       setPendingCompanies(pendingData.data);
+      setRecentNotifications(notifData.items);
     } catch (err) {
       console.error(err);
       setError(err.message || 'Failed to load dashboard data');
@@ -251,7 +257,7 @@ function AdminDashboard() {
                       <td>
                         <div className="d-flex align-items-center">
                           {company.logoUrl ? (
-                            <img src={company.logoUrl} alt="Logo" className="rounded-circle me-2 bg-light" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+                            <img src={resolveFileUrl(company.logoUrl)} alt="Logo" className="rounded-circle me-2 bg-light" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
                           ) : (
                             <div className="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style={{ width: '32px', height: '32px', fontSize: '0.8rem' }}>
                               {company.companyName.charAt(0).toUpperCase()}
@@ -340,6 +346,42 @@ function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Recent Notifications */}
+      <div className="card border-0 shadow-sm mt-5">
+        <div className="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h2 className="h5 mb-0 fw-bold text-dark">Recent Notifications</h2>
+          <Link to="/notifications" className="btn btn-outline-secondary btn-sm">
+            View All
+          </Link>
+        </div>
+        <div className="card-body p-0">
+          {recentNotifications.length === 0 ? (
+            <div className="text-center py-5 text-secondary">
+              <i className="bi bi-bell-slash fs-2 mb-2 d-block" aria-hidden="true" />
+              No notifications yet.
+            </div>
+          ) : (
+            <ul className="list-group list-group-flush">
+              {recentNotifications.map((notif) => (
+                <li
+                  key={notif.id}
+                  className={`list-group-item px-4 py-3 ${!notif.isRead ? 'border-start border-4 border-primary' : ''}`}
+                >
+                  <div className="d-flex justify-content-between align-items-start gap-2">
+                    <p className={`mb-0 small flex-grow-1 ${!notif.isRead ? 'fw-semibold' : ''}`}>
+                      {notif.message}
+                    </p>
+                    <span className="text-muted small flex-shrink-0">
+                      {new Date(notif.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

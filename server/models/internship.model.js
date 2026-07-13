@@ -54,22 +54,22 @@ function mapInternshipDetailRow(row) {
     id: row.id,
     title: row.title,
     description: row.description,
-    requiredSkills: parseRequiredSkills(row.required_skills),
+    requiredSkills: parseRequiredSkills(row.requiredSkills),
     location: row.location,
     duration: row.duration,
     stipend: row.stipend,
-    applicationDeadline: row.application_deadline,
+    applicationDeadline: row.applicationDeadline,
     status: row.status,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    ownerUserId: row.company_user_id,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    companyUserId: row.companyUserId,
     company: {
-      id: row.company_id,
-      companyName: row.company_name,
-      description: row.company_description,
+      id: row.companyId,
+      companyName: row.companyName,
+      description: row.companyDescription,
       website: row.website,
       industry: row.industry,
-      logoUrl: row.logo_url,
+      logoUrl: row.companyLogoUrl,
     },
   };
 }
@@ -101,7 +101,7 @@ async function createInternship({
       duration,
       stipend,
       applicationDeadline,
-      status || 'draft',,
+      status || 'draft',
     ]
   );
 
@@ -124,6 +124,9 @@ async function findInternshipRawById(internshipId) {
       i.created_at AS createdAt,
       i.updated_at AS updatedAt,
       cp.company_name AS companyName,
+      cp.description AS companyDescription,
+      cp.website AS website,
+      cp.industry AS industry,
       cp.logo_url AS companyLogoUrl,
       cp.user_id AS companyUserId
     FROM internships i

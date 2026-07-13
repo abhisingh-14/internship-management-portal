@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import MainLayout from '../components/common/MainLayout';
 import ProtectedRoute from '../components/common/ProtectedRoute';
 import RoleRoute from '../components/common/RoleRoute';
@@ -19,6 +19,8 @@ import EditCompanyProfile from '../pages/company/EditCompanyProfile';
 import ManagePostings from '../pages/company/ManagePostings';
 
 import StudentApplications from '../pages/student/StudentApplications';
+import StudentDashboard from '../pages/student/Dashboard';
+import StudentProfile from '../pages/student/Profile';
 import SavedInternships from '../pages/student/SavedInternships';
 import CompanyApplicants from '../pages/company/CompanyApplicants';
 import Notifications from '../pages/shared/Notifications';
@@ -56,7 +58,8 @@ function AppRoutes() {
           </Route>
 
           <Route element={<RoleRoute allowedRoles={['student']} />}>
-            <Route path="student/dashboard" element={<Navigate to="/student/applications" replace />} />
+            <Route path="student/dashboard" element={<StudentDashboard />} />
+            <Route path="student/profile" element={<StudentProfile />} />
             <Route path="student/applications" element={<StudentApplications />} />
             <Route path="student/saved" element={<SavedInternships />} />
           </Route>

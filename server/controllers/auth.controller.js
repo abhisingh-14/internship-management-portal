@@ -105,11 +105,11 @@ const login = asyncHandler(async (req, res) => {
       throw new NotFoundError('Company profile not found');
     }
 
-    if (companyProfile.approval_status === 'pending') {
+    if (companyProfile.approvalStatus === 'pending') {
       throw new ForbiddenError('Your company account is pending admin approval');
     }
 
-    if (companyProfile.approval_status === 'rejected') {
+    if (companyProfile.approvalStatus === 'rejected') {
       throw new ForbiddenError('Your company registration was rejected');
     }
   }
@@ -153,7 +153,7 @@ const refreshToken = asyncHandler(async (req, res) => {
     throw new UnauthorizedError('Account associated with this token no longer exists');
   }
 
-  if (user.account_status === 'deactivated') {
+  if (user.accountStatus === 'deactivated') {
     throw new UnauthorizedError('This account has been deactivated');
   }
 

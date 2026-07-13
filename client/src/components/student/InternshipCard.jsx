@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import { resolveFileUrl } from '../../utils/fileUrl';
 
 /**
  * Formats an ISO date string ("2026-09-01") into a short, readable form
@@ -42,7 +43,7 @@ function InternshipCard({ internship }) {
           <div className="d-flex align-items-center mb-2">
             {internship.companyLogoUrl ? (
               <img
-                src={internship.companyLogoUrl}
+                src={resolveFileUrl(internship.companyLogoUrl)}
                 alt={`${internship.companyName} logo`}
                 className="rounded me-2"
                 style={{ width: '40px', height: '40px', objectFit: 'cover' }}

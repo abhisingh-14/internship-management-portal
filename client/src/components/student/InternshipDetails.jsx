@@ -7,6 +7,7 @@ import api from '../../services/api';
 import useAuth from '../../hooks/useAuth';
 import Loader from '../../components/common/Loader';
 import AlertMessage from '../../components/common/AlertMessage';
+import { resolveFileUrl } from '../../utils/fileUrl';
 
 /**
  * Formats an ISO date string into a readable, locale-aware form.
@@ -258,7 +259,7 @@ function InternshipDetails() {
             <div className="d-flex align-items-center mb-3 mb-md-0">
               {internship.company.logoUrl ? (
                 <img
-                  src={internship.company.logoUrl}
+                  src={resolveFileUrl(internship.company.logoUrl)}
                   alt={`${internship.company.companyName} logo`}
                   className="rounded me-3"
                   style={{ width: '64px', height: '64px', objectFit: 'cover' }}

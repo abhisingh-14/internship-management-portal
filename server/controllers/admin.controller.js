@@ -47,7 +47,7 @@ const getUsers = asyncHandler(async (req, res) => {
 
   const querySql = `
     SELECT u.id, u.name, u.email, u.role, u.account_status AS accountStatus, u.created_at AS createdAt, u.updated_at AS updatedAt,
-           sp.id AS studentId, sp.education AS studentEducation, sp.skills AS studentSkills, sp.resume_url AS studentResumeUrl,
+           sp.id AS studentId, sp.resume_url AS studentResumeUrl,
            cp.id AS companyId, cp.company_name AS companyName, cp.industry AS companyIndustry, cp.logo_url AS companyLogoUrl, cp.approval_status AS companyApprovalStatus
     FROM users u
     LEFT JOIN student_profiles sp ON u.id = sp.user_id
@@ -84,8 +84,6 @@ const getUsers = asyncHandler(async (req, res) => {
     if (row.role === 'student') {
       user.studentProfile = {
         id: row.studentId,
-        education: row.studentEducation,
-        skills: typeof row.studentSkills === 'string' ? JSON.parse(row.studentSkills) : row.studentSkills,
         resumeUrl: row.studentResumeUrl,
       };
     } else if (row.role === 'company') {
@@ -435,8 +433,8 @@ const getApplications = asyncHandler(async (req, res) => {
   const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
   const querySql = `
-    SELECT a.id, a.status, a.cover_letter AS coverLetter, a.rejection_reason AS rejectionReason,
-           a.created_at AS appliedAt,
+    SELECT a.id, a.status, a.cover_letter AS coverLetter,
+           a.applied_at AS appliedAt,
            u.name AS studentName, u.email AS studentEmail,
            sp.resume_url AS resumeUrl,
            i.title AS internshipTitle,
@@ -447,7 +445,7 @@ const getApplications = asyncHandler(async (req, res) => {
     INNER JOIN internships i ON a.internship_id = i.id
     INNER JOIN company_profiles cp ON i.company_id = cp.id
     ${whereClause}
-    ORDER BY a.created_at DESC
+    ORDER BY a.applied_at DESC
     LIMIT ? OFFSET ?
   `;
 

@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import * as adminService from '../../services/adminService';
+import { resolveFileUrl } from '../../utils/fileUrl';
 
 const STATUS_BADGE = {
   published: 'bg-success',
@@ -188,7 +189,7 @@ function AdminInternships() {
                           <div className="d-flex align-items-center gap-2">
                             {internship.companyLogoUrl ? (
                               <img
-                                src={internship.companyLogoUrl}
+                                src={resolveFileUrl(internship.companyLogoUrl)}
                                 alt=""
                                 className="rounded bg-light"
                                 style={{ width: '28px', height: '28px', objectFit: 'contain' }}

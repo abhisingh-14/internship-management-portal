@@ -1,27 +1,20 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Fragment } from 'react';
 import * as adminService from '../../services/adminService';
 
-const ROLE_BADGE = {
-  student: 'bg-primary',
-  company: 'bg-info text-dark',
-};
-
 const STATUS_BADGE = {
-  pending: 'bg-warning text-dark',
+  applied: 'bg-primary',
+  under_review: 'bg-info text-dark',
+  shortlisted: 'bg-warning text-dark',
   accepted: 'bg-success',
   rejected: 'bg-danger',
   withdrawn: 'bg-secondary',
 };
 
-const ROLE_FILTER_OPTIONS = [
-  { value: '', label: 'All Roles' },
-  { value: 'student', label: 'Students' },
-  { value: 'company', label: 'Companies' },
-];
-
 const APPLICATION_STATUS_FILTERS = [
   { value: '', label: 'All Statuses' },
-  { value: 'pending', label: 'Pending' },
+  { value: 'applied', label: 'Applied' },
+  { value: 'under_review', label: 'Under Review' },
+  { value: 'shortlisted', label: 'Shortlisted' },
   { value: 'accepted', label: 'Accepted' },
   { value: 'rejected', label: 'Rejected' },
   { value: 'withdrawn', label: 'Withdrawn' },
@@ -139,8 +132,9 @@ function AdminApplications() {
                 </thead>
                 <tbody>
                   {applications.map((app, idx) => (
-                    <>
-                      <tr key={app.id}>
+                    // key belongs on Fragment, not on the inner <tr>
+                    <Fragment key={app.id}>
+                      <tr>
                         <td className="text-secondary small">{((page - 1) * 15) + idx + 1}</td>
                         <td>
                           <span className="fw-semibold text-dark d-block">{app.studentName}</span>
@@ -173,16 +167,16 @@ function AdminApplications() {
 
                       {/* Expanded details row */}
                       {expandedId === app.id && (
-                        <tr key={`${app.id}-detail`} className="table-light">
+                        <tr className="table-light">
                           <td colSpan="7" className="px-4 py-3">
                             <div className="row g-3">
-                              <div className="col-md-4">
+                              <div className="col-md-6">
                                 <span className="small fw-semibold text-secondary d-block mb-1">Cover Letter</span>
                                 <p className="small mb-0" style={{ whiteSpace: 'pre-wrap' }}>
                                   {app.coverLetter || <em className="text-muted">Not provided</em>}
                                 </p>
                               </div>
-                              <div className="col-md-4">
+                              <div className="col-md-6">
                                 <span className="small fw-semibold text-secondary d-block mb-1">Resume</span>
                                 {app.resumeUrl ? (
                                   <a
@@ -198,17 +192,11 @@ function AdminApplications() {
                                   <span className="text-muted small">Not uploaded</span>
                                 )}
                               </div>
-                              <div className="col-md-4">
-                                <span className="small fw-semibold text-secondary d-block mb-1">Rejection Reason</span>
-                                <p className="small mb-0 text-muted">
-                                  {app.rejectionReason || '—'}
-                                </p>
-                              </div>
                             </div>
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   ))}
                 </tbody>
               </table>

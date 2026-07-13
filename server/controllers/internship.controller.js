@@ -75,7 +75,7 @@ async function assertCompanyOwnsInternship(internshipId, userId) {
 const createInternship = asyncHandler(async (req, res) => {
   const companyProfile = await getOwnCompanyProfile(req.user.userId);
 
-  if (companyProfile.approval_status !== 'approved') {
+  if (companyProfile.approvalStatus !== 'approved') {
     throw new ForbiddenError(
       'Your company account must be approved by an admin before you can post internships'
     );

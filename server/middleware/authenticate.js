@@ -41,7 +41,7 @@ const authenticate = asyncHandler(async (req, res, next) => {
     throw new UnauthorizedError('Account associated with this token no longer exists');
   }
 
-  if (user.account_status === 'deactivated') {
+  if (user.accountStatus === 'deactivated') {
     throw new UnauthorizedError('This account has been deactivated');
   }
 

@@ -12,6 +12,8 @@ const DESKTOP_BREAKPOINT_PX = 768;
 const DEFAULT_SIDEBAR_ITEMS = [{ label: 'Home', path: '/' }];
 
 const STUDENT_SIDEBAR_ITEMS = [
+  { label: 'Dashboard', path: '/student/dashboard' },
+  { label: 'My Profile', path: '/student/profile' },
   { label: 'Browse Internships', path: '/internships' },
   { label: 'My Applications', path: '/student/applications' },
   { label: 'Saved Internships', path: '/student/saved' },

@@ -22,7 +22,7 @@ async function optionalAuthenticate(req, res, next) {
 
     const user = await userModel.findById(decoded.userId);
 
-    if (!user || user.account_status !== 'active') {
+    if (!user || user.accountStatus !== 'active') {
       return next();
     }
 

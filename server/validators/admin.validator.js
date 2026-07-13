@@ -147,8 +147,8 @@ const auditLogsQueryValidator = [
 const applicationsQueryValidator = [
   query('status')
     .optional()
-    .isIn(['pending', 'accepted', 'rejected', 'withdrawn'])
-    .withMessage('Status must be pending, accepted, rejected, or withdrawn'),
+    .isIn(['applied', 'under_review', 'shortlisted', 'accepted', 'rejected', 'withdrawn'])
+    .withMessage('Status must be applied, under_review, shortlisted, accepted, rejected, or withdrawn'),
   query('page')
     .optional()
     .isInt({ min: 1 })
