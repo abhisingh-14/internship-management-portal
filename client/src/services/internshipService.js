@@ -97,6 +97,7 @@ export const deleteInternship = async (internshipId) => {
 };
 
 export default {
+  getPublishedInternships,
   getMyInternships,
   getInternshipById,
   createInternship,

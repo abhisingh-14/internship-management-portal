@@ -16,6 +16,7 @@
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 const env = require('./config/env');
 const logger = require('./utils/logger');
@@ -54,9 +55,22 @@ app.use('/uploads', fileRoutes);
 
 app.use('/api/v1', apiRouter);
 
+// Serve React SPA in production
+if (env.isProduction) {
+  const clientBuildPath = path.join(__dirname, '..', 'client', 'dist');
+  app.use(express.static(clientBuildPath));
+  
+  // Fallback to index.html for all non-API/non-upload client routes
+  app.get(/^(?!\/(api|uploads|health)).*$/, (req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+  logger.info('Production static file serving initialized.');
+}
+
 app.use(notFoundHandler);
 app.use(errorHandler);
 
 logger.info(`Express app configured for ${env.nodeEnv} environment.`);
 
 module.exports = app;
+

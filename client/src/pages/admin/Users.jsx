@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import * as adminService from '../../services/adminService';
 
 function AdminUsers() {
@@ -19,7 +19,7 @@ function AdminUsers() {
   const [confirmUserStatus, setConfirmUserStatus] = useState(null); // { user, newStatus }
   const [confirmUserDelete, setConfirmUserDelete] = useState(null); // user
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -38,11 +38,11 @@ function AdminUsers() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [roleFilter, statusFilter, querySearch, page]);
 
   useEffect(() => {
     loadUsers();
-  }, [roleFilter, statusFilter, querySearch, page]);
+  }, [loadUsers]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();

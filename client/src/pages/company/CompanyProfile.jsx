@@ -1,40 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchCompanyProfile, uploadCompanyLogo } from '../../services/companyService';
+import { fetchCompanyProfile } from '../../services/companyService';
 import Loader from '../../components/common/Loader';
 import AlertMessage from '../../components/common/AlertMessage';
 import ApprovalStatusBadge from '../../components/company/ApprovalStatusBadge';
-import { resolveFileUrl } from '../../utils/fileUrl';
-
 
 function CompanyProfile() {
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [logoUploading, setLogoUploading] = useState(false);
-  const [logoError, setLogoError] = useState(null);
-
-  const handleLogoUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('logo', file);
-
-    setLogoUploading(true);
-    setLogoError(null);
-
-    try {
-      const data = await uploadCompanyLogo(formData);
-      setProfile((prev) => ({ ...prev, logoUrl: data.logoUrl }));
-    } catch (err) {
-      console.error(err);
-      setLogoError(err.message || 'Failed to upload logo');
-    } finally {
-      setLogoUploading(false);
-    }
-  };
-
 
   useEffect(() => {
     let isMounted = true;
@@ -118,53 +92,8 @@ function CompanyProfile() {
               {profile.industry || <span className="text-muted">Not provided</span>}
             </dd>
 
-             <dt className="col-sm-3">Logo</dt>
-            <dd className="col-sm-9">
-              <div className="d-flex flex-column align-items-start gap-2">
-                {profile.logoUrl ? (
-                  <div className="d-flex align-items-center gap-3">
-                    <img
-                      src={resolveFileUrl(profile.logoUrl)}
-                      alt="Company Logo"
-                      className="rounded bg-light p-1 border"
-                      style={{ width: '80px', height: '80px', objectFit: 'contain' }}
-                    />
-                    <label className="btn btn-sm btn-outline-secondary mb-0" htmlFor="logo-upload-input" style={{ cursor: 'pointer' }}>
-                      {logoUploading ? 'Uploading...' : 'Replace Logo'}
-                      <input
-                        id="logo-upload-input"
-                        type="file"
-                        accept=".png,.jpg,.jpeg,.svg"
-                        className="d-none"
-                        onChange={handleLogoUpload}
-                        disabled={logoUploading}
-                      />
-                    </label>
-                  </div>
-                ) : (
-                  <div className="d-flex align-items-center gap-3">
-                    <div
-                      className="rounded bg-secondary text-white d-flex align-items-center justify-content-center fw-bold"
-                      style={{ width: '80px', height: '80px', fontSize: '2rem' }}
-                    >
-                      {profile.companyName ? profile.companyName.charAt(0).toUpperCase() : '?'}
-                    </div>
-                    <label className="btn btn-sm btn-outline-primary mb-0" htmlFor="logo-upload-input" style={{ cursor: 'pointer' }}>
-                      {logoUploading ? 'Uploading...' : 'Upload Logo'}
-                      <input
-                        id="logo-upload-input"
-                        type="file"
-                        accept=".png,.jpg,.jpeg,.svg"
-                        className="d-none"
-                        onChange={handleLogoUpload}
-                        disabled={logoUploading}
-                      />
-                    </label>
-                  </div>
-                )}
-                {logoError && <div className="text-danger small mt-1">{logoError}</div>}
-              </div>
-            </dd>
+            <dt className="col-sm-3">Logo</dt>
+            <dd className="col-sm-9 text-muted">Logo upload is coming soon.</dd>
           </dl>
         </div>
       </div>

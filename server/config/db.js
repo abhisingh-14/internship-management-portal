@@ -8,6 +8,9 @@
 
 const mysql = require('mysql2/promise');
 const env = require('./env');
+const fs = require('fs');
+const path = require('path');
+const logger = require('../utils/logger');
 
 const pool = mysql.createPool({
   host: env.db.host,
@@ -37,6 +40,7 @@ async function testConnection() {
 async function initializeDatabase() {
   const connection = await pool.getConnection();
   try {
+    // 1. Create admin_audit_logs table if it does not already exist
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS admin_audit_logs (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -54,6 +58,73 @@ async function initializeDatabase() {
         INDEX idx_admin_audit_logs_created_at (created_at)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Audit log for administrative actions';
     `);
+
+    // 2. Create migrations table if it does not already exist
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS migrations (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL UNIQUE,
+        executed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    // 3. Scan and execute any pending migration files
+    const migrationsDir = path.join(__dirname, '../database/migration');
+    if (fs.existsSync(migrationsDir)) {
+      const files = fs.readdirSync(migrationsDir)
+        .filter(file => file.endsWith('.sql'))
+        .sort();
+
+      for (const file of files) {
+        const [rows] = await connection.execute(
+          'SELECT 1 FROM migrations WHERE name = ? LIMIT 1',
+          [file]
+        );
+
+        if (rows.length === 0) {
+          logger.info(`Applying database migration: ${file}`);
+          const filePath = path.join(migrationsDir, file);
+          const content = fs.readFileSync(filePath, 'utf8');
+
+          // Clean comments and split by semicolon
+          const cleanContent = content
+            .split(/\r?\n/)
+            .map(line => {
+              const trimmed = line.trim();
+              if (trimmed.startsWith('--') || trimmed.startsWith('#')) {
+                return '';
+              }
+              return line;
+            })
+            .join('\n');
+
+          const statements = cleanContent
+            .split(';')
+            .map(stmt => stmt.trim())
+            .filter(stmt => stmt.length > 0);
+
+          // Execute statements sequentially
+          for (const statement of statements) {
+            try {
+              await connection.execute(statement);
+            } catch (err) {
+              logger.error(`Failed to execute statement in migration ${file}:`, {
+                statement,
+                error: err.message,
+              });
+              throw err;
+            }
+          }
+
+          // Record migration execution
+          await connection.execute(
+            'INSERT INTO migrations (name) VALUES (?)',
+            [file]
+          );
+          logger.info(`Successfully applied migration: ${file}`);
+        }
+      }
+    }
   } finally {
     connection.release();
   }

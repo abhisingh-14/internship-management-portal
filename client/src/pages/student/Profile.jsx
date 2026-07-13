@@ -3,8 +3,6 @@ import Loader from '../../components/common/Loader';
 import AlertMessage from '../../components/common/AlertMessage';
 import useAuth from '../../hooks/useAuth';
 import { AUTH_TOKEN_KEY } from '../../context/AuthContext';
-import { resolveFileUrl } from '../../utils/fileUrl';
-
 import {
   fetchStudentProfile,
   updateStudentProfile,
@@ -432,7 +430,7 @@ function StudentProfile() {
                 <p className="small text-muted mb-0">Your resume is ready for internship applications.</p>
               </div>
               <div className="d-flex gap-2 flex-wrap">
-                <a href={`${resolveFileUrl(profile.resumeUrl)}?token=${encodeURIComponent(token)}`}
+                <a href={`${serverOrigin}${profile.resumeUrl}?token=${encodeURIComponent(token)}`}
                   target="_blank" rel="noopener noreferrer"
                   className="btn btn-sm btn-outline-primary d-inline-flex align-items-center">
                   <i className="bi bi-eye me-1" aria-hidden="true" />View

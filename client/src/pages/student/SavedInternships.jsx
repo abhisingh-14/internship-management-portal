@@ -85,7 +85,7 @@ function SavedInternships() {
           <div className="card-body">
             <i className="bi bi-heart text-muted fs-1 mb-3" aria-hidden="true" />
             <h5 className="text-secondary">No saved internships</h5>
-            <p className="text-muted">You haven't bookmarked any internships yet.</p>
+            <p className="text-muted">You haven&apos;t bookmarked any internships yet.</p>
             <Link to="/internships" className="btn btn-primary mt-2">
               Browse Internships
             </Link>

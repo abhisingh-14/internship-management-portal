@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import * as adminService from '../../services/adminService';
 import { resolveFileUrl } from '../../utils/fileUrl';
 
@@ -18,7 +18,7 @@ function AdminCompanies() {
   const [reasonText, setReasonText] = useState('');
   const [modalError, setModalError] = useState('');
 
-  const loadPending = async () => {
+  const loadPending = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -34,11 +34,11 @@ function AdminCompanies() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [page]);
 
   useEffect(() => {
     loadPending();
-  }, [page]);
+  }, [loadPending]);
 
   const handleOpenModal = (company, decision) => {
     setSelectedCompany(company);

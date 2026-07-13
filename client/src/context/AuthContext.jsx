@@ -4,6 +4,11 @@ import { createContext, useEffect, useReducer, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import * as authService from '../services/authService';
 
+// AuthContext is intentionally exported alongside AuthProvider from this
+// single file, per the file layout established in
+// docs/Components/05_Authentication.md; only Fast Refresh's dev-time
+// hot-reload granularity is affected, not runtime behavior.
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
 
 const AUTH_TOKEN_KEY = 'authToken';

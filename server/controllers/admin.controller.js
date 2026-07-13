@@ -4,6 +4,7 @@ const { sendSuccess } = require('../utils/apiResponse');
 const asyncHandler = require('../utils/asyncHandler');
 const notificationModel = require('../models/notification.model');
 const companyProfileModel = require('../models/companyProfile.model');
+const { parsePaginationParams } = require('../utils/pagination');
 
 /**
  * Helper to record admin audit logs.
@@ -21,8 +22,8 @@ async function recordAuditLog(actorId, action, targetId, details) {
  * Retrieves all registered users with filters (role, status, search) and pagination.
  */
 const getUsers = asyncHandler(async (req, res) => {
-  const { role, status, search, page = 1, limit = 10 } = req.query;
-  const offset = (page - 1) * limit;
+  const { page, limit, offset } = parsePaginationParams(req.query);
+  const { role, status, search } = req.query;
 
   const conditions = ['u.role != "admin"']; // Don't expose admins in the management lists
   const params = [];
@@ -211,8 +212,7 @@ const deleteUser = asyncHandler(async (req, res) => {
  * Retrieves pending company registrations awaiting verification.
  */
 const getPendingCompanies = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
-  const offset = (page - 1) * limit;
+  const { page, limit, offset } = parsePaginationParams(req.query);
 
   // Querying using the database view view_pending_company_approvals
   const querySql = `
@@ -294,8 +294,8 @@ const approveCompany = asyncHandler(async (req, res) => {
  * Retrieves all internship postings platform-wide.
  */
 const getInternships = asyncHandler(async (req, res) => {
-  const { status, companyId, page = 1, limit = 10 } = req.query;
-  const offset = (page - 1) * limit;
+  const { page, limit, offset } = parsePaginationParams(req.query);
+  const { status, companyId } = req.query;
 
   const conditions = [];
   const params = [];
@@ -419,8 +419,8 @@ const moderateInternship = asyncHandler(async (req, res) => {
  * Retrieves all internship applications platform-wide for admin oversight.
  */
 const getApplications = asyncHandler(async (req, res) => {
-  const { status, page = 1, limit = 15 } = req.query;
-  const offset = (page - 1) * limit;
+  const { page, limit, offset } = parsePaginationParams({ limit: 15, ...req.query });
+  const { status } = req.query;
 
   const conditions = [];
   const params = [];
@@ -476,8 +476,8 @@ const getApplications = asyncHandler(async (req, res) => {
  * Retrieves a log of administrative actions for accountability.
  */
 const getAuditLogs = asyncHandler(async (req, res) => {
-  const { actorId, action, startDate, endDate, page = 1, limit = 10 } = req.query;
-  const offset = (page - 1) * limit;
+  const { page, limit, offset } = parsePaginationParams(req.query);
+  const { actorId, action, startDate, endDate } = req.query;
 
   const conditions = [];
   const params = [];

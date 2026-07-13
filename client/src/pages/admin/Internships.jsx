@@ -6,7 +6,7 @@ const STATUS_BADGE = {
   published: 'bg-success',
   draft: 'bg-secondary',
   closed: 'bg-warning text-dark',
-  flagged: 'bg-orange text-white',
+  flagged: 'bg-info text-dark',
   removed: 'bg-danger',
 };
 

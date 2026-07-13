@@ -101,7 +101,6 @@ function ManagePostings() {
   };
 
   const handleDelete = async (internship) => {
-    // eslint-disable-next-line no-alert
     const confirmed = window.confirm(`Delete "${internship.title}"? This cannot be undone.`);
     if (!confirmed) return;
 

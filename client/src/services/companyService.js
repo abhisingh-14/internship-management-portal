@@ -25,15 +25,3 @@ export async function updateCompanyProfile(payload) {
   const response = await api.put('/companies/profile', payload);
   return response.data.data;
 }
-
-/**
- * Uploads a logo file (JPG / PNG / SVG, max 2 MB) for the authenticated company.
- * @param {FormData} formData Must contain field named "logo".
- */
-export async function uploadCompanyLogo(formData) {
-  const response = await api.post('/companies/logo', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
-  return response.data.data;
-}
-
