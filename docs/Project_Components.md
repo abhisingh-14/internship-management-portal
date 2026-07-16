@@ -406,13 +406,13 @@ For every component
 - [x] Component 05
 - [x] Component 06
 - [x] Component 07
-- [x] Component 08
-- [x] Component 09
-- [x] Component 10
-- [x] Component 11
-- [x] Component 12
-- [x] Component 13
-- [x] Component 14
-- [x] Component 15
-- [x] Component 16
-- [x] Component 17
+- [ ] Component 08
+- [ ] Component 09
+- [ ] Component 10
+- [ ] Component 11
+- [ ] Component 12
+- [ ] Component 13
+- [ ] Component 14
+- [ ] Component 15
+- [ ] Component 16
+- [ ] Component 17
